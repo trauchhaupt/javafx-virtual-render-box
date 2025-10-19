@@ -26,30 +26,7 @@ public class DiagonalTextureRenderer implements IVirtualRenderTextureFactory<Str
     @Override
     public void render(IVirtualRendererInput<String> rendererInput, IntBuffer byteBuffer, int capacity, int width, int height) {
         for (int i = 0; i < capacity; i++) {
-            byteBuffer.put(i, i % 2 == 0 ? 123456 : -234234);
+            byteBuffer.put(i, i % 2 == 0 ? -234234 : -123456 );
         }
     }
-
-   /* @Override
-    public void render(IVirtualRendererInput<String> rendererInput, ByteBuffer buffer, int capacity, int width, int height) {
-        int colorByRow = 0;
-        int bytesPerRow = capacity / height;
-        int iRow = 0;
-        for (int i = 0; i < capacity; i++) {
-
-            if (i % bytesPerRow == 0)
-                iRow++;
-
-            if (i > 0 &&
-                    ((i - 1) % 3 == 0) &&
-                    (iRow % 10 == 0))
-                buffer.put(i, (byte) 255);
-            else if (i % 60 == 0)
-                buffer.put(i, (byte) 255);
-            else if (i % 6 == 0)
-                buffer.put(i, (byte) 125);
-            else
-                buffer.put(i, (byte) 0);
-        }
-    }*/
 }

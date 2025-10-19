@@ -19,8 +19,10 @@ public class NGVirtualRenderBox extends NGNode {
 
     @Override
     protected void renderContent(Graphics graphics) {
-        int realWidth = (int) Math.floor(width * graphics.getPixelScaleFactorX());
-        int realHeight = (int) Math.floor(height * graphics.getPixelScaleFactorY());
+        int realWidth = (int) Math.floor(width * graphics.getAssociatedScreen().getPlatformScaleX());
+        int realHeight = (int) Math.floor(height * graphics.getAssociatedScreen().getPlatformScaleY());
+        //int realWidth = (int) Math.floor(width);
+        //int realHeight = (int) Math.floor(height);
 
         IVirtualRenderTextureFactory factory = VirtualRenderTextureFactoryIndex.getFactoryFor(rendererInput);
 
@@ -36,9 +38,7 @@ public class NGVirtualRenderBox extends NGNode {
             System.out.println("Creating texture with " + realWidth + "/" + realHeight + " at " + tex.getPixelFormat().getBytesPerPixelUnit());
             tex.update(tmpByteBuffer, format, 0, 0, 0, 0, realWidth, realHeight, bytesPerRow, false);
             graphics.drawTexture(tex, 0, 0, width, height);
-        }
-        else
-        {
+        } else {
             graphics.clear(Color.TRANSPARENT);
         }
     }
