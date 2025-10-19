@@ -6,11 +6,11 @@ import de.vonrauchhaupt.javafx.virtualrenderbox.IVirtualRendererInput;
 import de.vonrauchhaupt.javafx.virtualrenderbox.VirtualRendererType;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 public class DiagonalTextureRenderer implements IVirtualRenderTextureFactory<String> {
 
-    private static final VirtualRendererType TYPE = new VirtualRendererType("DiagonalTexture", String.class, PixelFormat.BYTE_RGB);
+    private static final VirtualRendererType TYPE = new VirtualRendererType("DiagonalTexture", String.class, PixelFormat.INT_ARGB_PRE);
 
     @Override
     @NotNull
@@ -24,6 +24,13 @@ public class DiagonalTextureRenderer implements IVirtualRenderTextureFactory<Str
     }
 
     @Override
+    public void render(IVirtualRendererInput<String> rendererInput, IntBuffer byteBuffer, int capacity, int width, int height) {
+        for (int i = 0; i < capacity; i++) {
+            byteBuffer.put(i, i % 2 == 0 ? 123456 : -234234);
+        }
+    }
+
+   /* @Override
     public void render(IVirtualRendererInput<String> rendererInput, ByteBuffer buffer, int capacity, int width, int height) {
         int colorByRow = 0;
         int bytesPerRow = capacity / height;
@@ -43,20 +50,6 @@ public class DiagonalTextureRenderer implements IVirtualRenderTextureFactory<Str
                 buffer.put(i, (byte) 125);
             else
                 buffer.put(i, (byte) 0);
-
-
-
-            /*byte data = 4;
-            if (i % 12 == 0) {
-                data += 100;
-            }
-
-            if ((i - 1) % (bytesPerRow * 20) == 0)
-                colorByRow = 0;
-            else if ((i - 1) % bytesPerRow  == 0)
-                colorByRow += 10;
-
-            buffer.put(i , (byte)(data + colorByRow));*/
         }
-    }
+    }*/
 }
