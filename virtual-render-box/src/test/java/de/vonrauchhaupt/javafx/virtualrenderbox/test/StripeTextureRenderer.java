@@ -3,6 +3,7 @@ package de.vonrauchhaupt.javafx.virtualrenderbox.test;
 import com.sun.prism.PixelFormat;
 import de.vonrauchhaupt.javafx.virtualrenderbox.IVirtualRenderTextureFactory;
 import de.vonrauchhaupt.javafx.virtualrenderbox.IVirtualRendererInput;
+import de.vonrauchhaupt.javafx.virtualrenderbox.VirtualRendererOutput;
 import de.vonrauchhaupt.javafx.virtualrenderbox.VirtualRendererType;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,9 +27,22 @@ public class StripeTextureRenderer implements IVirtualRenderTextureFactory<Strin
     }
 
     @Override
-    public void render(IVirtualRendererInput<String> rendererInput, IntBuffer byteBuffer, int capacity, int width, int height) {
+    public @NotNull VirtualRendererOutput render(IVirtualRendererInput<String> rendererInput, int width, int height) {
+        int capacity = width * height;
+        IntBuffer tmpByteBuffer = IntBuffer.allocate(width * height);
         for (int i = 0; i < capacity; i++) {
-            byteBuffer.put(i, (i % 2 == 0) ? COLOR1 : COLOR2);
+            tmpByteBuffer.put(i, (i % 2 == 0) ? COLOR1 : COLOR2);
         }
+        return new VirtualRendererOutput(TYPE.pixelFormat(), tmpByteBuffer, width, height);
+    }
+
+    @Override
+    public double calculateWidthOfHeight(double height) {
+        return height;
+    }
+
+    @Override
+    public double calculateHeightOfWidth(double width) {
+        return width;
     }
 }

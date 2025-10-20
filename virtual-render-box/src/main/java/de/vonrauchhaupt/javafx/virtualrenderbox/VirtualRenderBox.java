@@ -43,6 +43,8 @@ public class VirtualRenderBox extends AbstractNode {
     private ObjectProperty<IVirtualRendererInput> inputData;
     private DoubleProperty width;
     private DoubleProperty height;
+    private boolean isWidthLeading = true;
+    private boolean contentAwareThingsInProgress = false;
 
     {
         // To initialize the class helper at the begining each constructor of this class
@@ -50,18 +52,21 @@ public class VirtualRenderBox extends AbstractNode {
     }
 
     public VirtualRenderBox() {
-        this(0, 0);
+
     }
 
-    /**
-     * Creates a new instance of Canvas with the given size.
-     *
-     * @param width  width of the canvas
-     * @param height height of the canvas
-     */
-    public VirtualRenderBox(double width, double height) {
-        setWidth(width);
-        setHeight(height);
+    public void setInputDataByWidth(IVirtualRendererInput<?> inputData, double width) {
+        onlyMarkGeomChangedOnce(() -> {
+            setWidth(width);
+            setInputData(inputData);
+        });
+    }
+
+    public void setInputDataByHeight(IVirtualRendererInput<?> inputData, double height) {
+        onlyMarkGeomChangedOnce(() -> {
+            setHeight(height);
+            setInputData(inputData);
+        });
     }
 
     public IVirtualRendererInput getInputData() {
@@ -78,7 +83,12 @@ public class VirtualRenderBox extends AbstractNode {
 
                 @Override
                 public void invalidated() {
-                    NodeHelper.markDirty(VirtualRenderBox.this, DirtyBits.NODE_CONTENTS);
+                    onlyMarkGeomChangedOnce(() -> {
+                        if (isWidthLeading)
+                            widthHasChanged();
+                        else
+                            heightHasChanged();
+                    });
                 }
 
                 @Override
@@ -103,14 +113,52 @@ public class VirtualRenderBox extends AbstractNode {
         widthProperty().set(value);
     }
 
+    private void onlyMarkGeomChangedOnce(Runnable runnable) {
+        boolean fireMarkGeomChanged = !contentAwareThingsInProgress;
+        contentAwareThingsInProgress = true;
+        try {
+            runnable.run();
+        } finally {
+            if (fireMarkGeomChanged)
+                contentAwareThingsInProgress = fireMarkGeomChanged;
+        }
+
+        if (fireMarkGeomChanged) {
+            NodeHelper.markDirty(VirtualRenderBox.this, DirtyBits.NODE_GEOMETRY);
+            NodeHelper.geomChanged(VirtualRenderBox.this);
+        }
+    }
+
+    private void widthHasChanged() {
+        onlyMarkGeomChangedOnce(() -> {
+            IVirtualRenderTextureFactory factory = VirtualRenderTextureFactoryIndex.getFactoryFor(getInputData());
+            if (factory == null)
+                heightProperty().set(0);
+            else
+                heightProperty().set(factory.calculateHeightOfWidth(getWidth()));
+        });
+    }
+
+    private void heightHasChanged() {
+        onlyMarkGeomChangedOnce(() -> {
+            IVirtualRenderTextureFactory factory = VirtualRenderTextureFactoryIndex.getFactoryFor(getInputData());
+            if (factory == null)
+                widthProperty().set(0);
+            else
+                widthProperty().set(factory.calculateHeightOfWidth(getHeight()));
+
+        });
+    }
+
     public final DoubleProperty widthProperty() {
         if (width == null) {
             width = new DoublePropertyBase() {
 
                 @Override
                 public void invalidated() {
-                    NodeHelper.markDirty(VirtualRenderBox.this, DirtyBits.NODE_GEOMETRY);
-                    NodeHelper.geomChanged(VirtualRenderBox.this);
+                    if (contentAwareThingsInProgress)
+                        return;
+                    widthHasChanged();
                 }
 
                 @Override
@@ -141,8 +189,9 @@ public class VirtualRenderBox extends AbstractNode {
 
                 @Override
                 public void invalidated() {
-                    NodeHelper.markDirty(VirtualRenderBox.this, DirtyBits.NODE_GEOMETRY);
-                    NodeHelper.geomChanged(VirtualRenderBox.this);
+                    if (contentAwareThingsInProgress)
+                        return;
+                    heightHasChanged();
                 }
 
                 @Override

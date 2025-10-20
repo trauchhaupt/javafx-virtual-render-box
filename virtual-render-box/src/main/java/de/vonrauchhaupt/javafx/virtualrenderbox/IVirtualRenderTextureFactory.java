@@ -2,9 +2,6 @@ package de.vonrauchhaupt.javafx.virtualrenderbox;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-
 public interface IVirtualRenderTextureFactory<INPUT> {
 
     @NotNull
@@ -15,5 +12,11 @@ public interface IVirtualRenderTextureFactory<INPUT> {
      */
     boolean isUsableForInput(@NotNull INPUT input);
 
-    void render(IVirtualRendererInput<INPUT> rendererInput, IntBuffer byteBuffer, int capacity, int width, int height);
+    @NotNull
+    VirtualRendererOutput render(IVirtualRendererInput<INPUT> rendererInput, int width, int height);
+
+    double calculateWidthOfHeight(double height);
+
+    double calculateHeightOfWidth(double width);
+
 }

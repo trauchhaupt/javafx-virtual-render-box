@@ -30,9 +30,8 @@ class VirtualRendererBoxStripeTest extends BaseJavaFXTest<VirtualRenderBox> {
         StripeTextureRenderer textureFactory = new StripeTextureRenderer();
         VirtualRenderTextureFactoryIndex.registerFactory(textureFactory);
         VirtualRenderBox virtualRenderFixWidthBox = new VirtualRenderBox();
-        virtualRenderFixWidthBox.setWidth(LENGTH_TO_TEST);
-        virtualRenderFixWidthBox.setHeight(LENGTH_TO_TEST);
-        virtualRenderFixWidthBox.setInputData(new IVirtualRendererInput<String>() {
+
+        virtualRenderFixWidthBox.setInputDataByWidth(new IVirtualRendererInput<String>() {
             @Override
             @NotNull
             public VirtualRendererType getType() {
@@ -50,7 +49,8 @@ class VirtualRendererBoxStripeTest extends BaseJavaFXTest<VirtualRenderBox> {
             public String getCacheId() {
                 return "DiagonalTextureRenderer";
             }
-        });
+        }, LENGTH_TO_TEST);
+
         return virtualRenderFixWidthBox;
     }
 

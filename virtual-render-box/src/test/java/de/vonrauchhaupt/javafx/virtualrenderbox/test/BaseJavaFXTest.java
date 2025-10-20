@@ -22,6 +22,7 @@ abstract class BaseJavaFXTest<T extends Node> {
         latch.await();
         if (caughtException.get() != null)
             throw caughtException.get();
+        PlatformImpl.tkExit();
     }
 
     private void doTestStartup() {
@@ -46,6 +47,7 @@ abstract class BaseJavaFXTest<T extends Node> {
                 });
             } catch (Throwable e) {
                 caughtException.set(e);
+                stopTest();
             }
         });
     }

@@ -7,16 +7,10 @@ import com.sun.prism.PixelFormat;
 import com.sun.prism.Texture;
 import com.sun.prism.paint.Color;
 
-import java.nio.IntBuffer;
-import java.util.Map;
-import java.util.WeakHashMap;
-
 public class NGVirtualRenderBox extends NGNode {
 
-    static final Map<String, Texture> textureCache = new WeakHashMap<>();
     private IVirtualRendererInput<?> rendererInput = null;
     private float width, height;
-    private String lastImageKey = null;
 
     protected NGVirtualRenderBox() {
         super();
@@ -25,6 +19,8 @@ public class NGVirtualRenderBox extends NGNode {
 
     @Override
     protected void doRender(Graphics graphics) {
+        if (width == 0 || height == 0)
+            return;
         graphics.setState3D(false);
         // save current depth test state
         boolean prevDepthTest = graphics.isDepthTest();
@@ -61,22 +57,19 @@ public class NGVirtualRenderBox extends NGNode {
         int realHeight = (int) Math.floor(height * graphics.getAssociatedScreen().getPlatformScaleY());
 
         IVirtualRenderTextureFactory factory;
-        lastImageKey = rendererInput.getCacheId() + "_" + realWidth + "_" + realHeight;
-        Texture texture = textureCache.get(lastImageKey);
-        if (texture != null) {
-            graphics.drawTexture(texture, 0, 0, realWidth, realHeight);
-        } else if ((factory = VirtualRenderTextureFactoryIndex.getFactoryFor(rendererInput)) != null) {
-            PixelFormat format = rendererInput == null ? PixelFormat.INT_ARGB_PRE : rendererInput.getType().pixelFormat();
-            texture = graphics.getResourceFactory().createTexture(format,
-                    Texture.Usage.STATIC, Texture.WrapMode.CLAMP_NOT_NEEDED, realWidth, realHeight);
-            int bytesPerRow = realWidth * texture.getPixelFormat().getBytesPerPixelUnit();
-            int capacity = realWidth * realHeight;
-            IntBuffer tmpByteBuffer = IntBuffer.allocate(capacity);
-            factory.render(rendererInput, tmpByteBuffer, capacity, realWidth, realHeight);
+        if ((factory = VirtualRenderTextureFactoryIndex.getFactoryFor(rendererInput)) != null) {
 
-            System.out.println("Creating texture with " + realWidth + "/" + realHeight + " at " + texture.getPixelFormat().getBytesPerPixelUnit());
-            texture.update(tmpByteBuffer, format, 0, 0, 0, 0, realWidth, realHeight, bytesPerRow, false);
+            VirtualRendererOutput renderOutput = factory.render(rendererInput, realWidth, realHeight);
+            PixelFormat format = renderOutput == null ? PixelFormat.INT_ARGB_PRE : renderOutput.pixelFormat();
+
+            Texture texture = graphics.getResourceFactory().createTexture(format,
+                    Texture.Usage.STATIC, Texture.WrapMode.CLAMP_NOT_NEEDED,
+                    realWidth, realHeight);
+
+            int bytesPerRow = realWidth * texture.getPixelFormat().getBytesPerPixelUnit();
+            texture.update(renderOutput.resultingImage(), format, 0, 0, 0, 0, realWidth, realHeight, bytesPerRow, false);
             graphics.drawTexture(texture, 0, 0, realWidth, realHeight);
+            texture.dispose();
         } else {
             graphics.clear(Color.TRANSPARENT);
         }
