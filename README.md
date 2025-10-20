@@ -1,10 +1,14 @@
 # javafx-virtual-render-box
 
-This was a try out, if one could create pixel perfect images from renderings.
+This is a POC for a pixel perfect component of virtual renderings.
 
-E.g. trying to display SVG graphics coming out from Batik or PDF renderings were always a bit blurry on displays with special display factors (such as 125%).
+Usually, the ImageView or the Canvas render virtual pixels. The virtual pixels are mapped to the physical pixels by the scaling factor set by the operating system.
 
-Sad to say there even was no way to render bitmap textures 1:1 in the Graphics object of a GNode.
+If you do not have fix pixel images, but algorithm, that can generate the output at any pixel size, your result becomes blurry needlessly.
 
-So -> There seems to be no way to render virtual images pixel perfect on screens with a scale factor.
-That makes a big minus point for javaFX, as even Swing had a way to do so.
+Therefore, this components calculates the real size of physical pixels and uses the synthetically generated image as basis.
+
+# Future usages
+In the future, the following components are planned:
+* SVGImageView
+* PDFImageView
