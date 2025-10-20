@@ -25,12 +25,10 @@ abstract class BaseJavaFXTest<T extends Node> {
     }
 
     private void doTestStartup() {
-
-
         Platform.runLater(() -> {
             try {
                 Stage stage = new Stage();
-                stage.setOnCloseRequest(x -> latch.countDown());
+                stage.setOnCloseRequest(x -> stopTest());
                 stage.setTitle("Test " + this.getClass().getName());
                 BorderPane rootPane = new BorderPane();
                 T testableNode = createTestNode();
@@ -38,7 +36,8 @@ abstract class BaseJavaFXTest<T extends Node> {
                 stage.setScene(new Scene(rootPane, 700, 700));
                 stage.show();
                 Platform.runLater(() -> {
-                    if ( doTestOnTestNode(testableNode))
+                    doTestOnTestNode(testableNode);
+                    if (!"true".equalsIgnoreCase(System.getProperty("TEST_STAY_OPEN")))
                         stopTest();
                 });
             } catch (Exception e) {
@@ -47,10 +46,9 @@ abstract class BaseJavaFXTest<T extends Node> {
         });
     }
 
-    abstract boolean doTestOnTestNode(T testableNode);
+    abstract void doTestOnTestNode(T testableNode);
 
-    void stopTest()
-    {
+    void stopTest() {
         latch.countDown();
     }
 

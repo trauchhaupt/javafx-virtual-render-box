@@ -15,8 +15,8 @@ class ImageViewTest extends BaseJavaFXTest<ImageView> {
     }
 
     @Override
-    boolean doTestOnTestNode(ImageView testableNode) {
-        return false;
+    void doTestOnTestNode(ImageView testableNode) {
+
     }
 
     @Override

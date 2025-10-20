@@ -8,9 +8,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.IntBuffer;
 
-public class DiagonalTextureRenderer implements IVirtualRenderTextureFactory<String> {
+public class StripeTextureRenderer implements IVirtualRenderTextureFactory<String> {
 
-    private static final VirtualRendererType TYPE = new VirtualRendererType("DiagonalTexture", String.class, PixelFormat.INT_ARGB_PRE);
+    static final int COLOR1 = -234234;
+    static final int COLOR2 = -123456;
+    private static final VirtualRendererType<String> TYPE = new VirtualRendererType<>("DiagonalTexture", String.class, PixelFormat.INT_ARGB_PRE);
 
     @Override
     @NotNull
@@ -26,7 +28,7 @@ public class DiagonalTextureRenderer implements IVirtualRenderTextureFactory<Str
     @Override
     public void render(IVirtualRendererInput<String> rendererInput, IntBuffer byteBuffer, int capacity, int width, int height) {
         for (int i = 0; i < capacity; i++) {
-            byteBuffer.put(i, i % 2 == 0 ? -234234 : -123456 );
+            byteBuffer.put(i, (i % 2 == 0) ? COLOR1 : COLOR2);
         }
     }
 }
