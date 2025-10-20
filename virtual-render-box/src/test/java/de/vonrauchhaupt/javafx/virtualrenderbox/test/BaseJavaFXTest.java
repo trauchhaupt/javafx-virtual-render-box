@@ -15,9 +15,9 @@ import java.util.concurrent.atomic.AtomicReference;
 abstract class BaseJavaFXTest<T extends Node> {
 
     CountDownLatch latch = new CountDownLatch(1);
-    AtomicReference<Exception> caughtException = new AtomicReference<>();
+    AtomicReference<Throwable> caughtException = new AtomicReference<>();
 
-    void startTest() throws Exception {
+    void startTest() throws Throwable {
         PlatformImpl.startup(this::doTestStartup);
         latch.await();
         if (caughtException.get() != null)
@@ -28,7 +28,7 @@ abstract class BaseJavaFXTest<T extends Node> {
         Platform.runLater(() -> {
             try {
                 Stage stage = new Stage();
-                stage.setOnCloseRequest(x -> stopTest());
+                stage.setOnCloseRequest(x -> latch.countDown());
                 stage.setTitle("Test " + this.getClass().getName());
                 BorderPane rootPane = new BorderPane();
                 T testableNode = createTestNode();
@@ -36,11 +36,15 @@ abstract class BaseJavaFXTest<T extends Node> {
                 stage.setScene(new Scene(rootPane, 700, 700));
                 stage.show();
                 Platform.runLater(() -> {
-                    doTestOnTestNode(testableNode);
-                    if (!"true".equalsIgnoreCase(System.getProperty("TEST_STAY_OPEN")))
+                    try {
+                        doTestOnTestNode(testableNode);
                         stopTest();
+                    } catch (Throwable e) {
+                        caughtException.set(e);
+                        stopTest();
+                    }
                 });
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 caughtException.set(e);
             }
         });
@@ -49,7 +53,8 @@ abstract class BaseJavaFXTest<T extends Node> {
     abstract void doTestOnTestNode(T testableNode);
 
     void stopTest() {
-        latch.countDown();
+        if (!"true".equalsIgnoreCase(System.getenv("TEST_STAY_OPEN")))
+            latch.countDown();
     }
 
     @NotNull

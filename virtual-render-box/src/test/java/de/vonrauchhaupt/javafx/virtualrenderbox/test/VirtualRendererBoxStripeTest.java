@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 class VirtualRendererBoxStripeTest extends BaseJavaFXTest<VirtualRenderBox> {
-    private static double LENGTH_TO_TEST = 200;
+    private static double LENGTH_TO_TEST = 200; // must be even
 
     @Test
-    void startSimpleImageView() throws Exception {
+    void startSimpleImageView() throws Throwable {
         super.startTest();
     }
 
@@ -73,7 +73,6 @@ class VirtualRendererBoxStripeTest extends BaseJavaFXTest<VirtualRenderBox> {
         Assertions.assertEquals(LENGTH_TO_TEST * testableNode.getScene().getWindow().getOutputScaleX(), snapshot.getWidth());
         Assertions.assertEquals(LENGTH_TO_TEST * testableNode.getScene().getWindow().getOutputScaleY(), snapshot.getHeight());
 
-        int capacity = (int) snapshot.getWidth() * (int) snapshot.getHeight();
         PixelReader pixelReader = snapshot.getPixelReader();
         for (int curX = 0; curX < snapshot.getWidth(); curX++) {
             for (int curY = 0; curY < snapshot.getHeight(); curY++) {
